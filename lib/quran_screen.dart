@@ -1,3 +1,5 @@
+import 'surah_detail_screen.dart';
+
 import 'package:flutter/material.dart';
 
 class QuranScreen extends StatelessWidget {
