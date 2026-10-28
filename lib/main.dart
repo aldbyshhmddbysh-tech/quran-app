@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'quran_screen.dart';
 
 void main() {
   runApp(const QuranApp());
@@ -53,7 +54,6 @@ class HomeScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
-            // زر قسم القرآن الكريم
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green[700],
@@ -63,7 +63,10 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                // سيتم إضافة الانتقال لقسم القرآن لاحقاً
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const QuranScreen()),
+                );
               },
               icon: const Icon(Icons.book, color: Colors.white),
               label: const Text(
@@ -72,7 +75,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            // زر قسم الأذكار اليومية
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal[700],
@@ -81,9 +83,7 @@ class HomeScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () {
-                // سيتم إضافة الانتقال لقسم الأذكار لاحقاً
-              },
+              onPressed: () {},
               icon: const Icon(Icons.favorite, color: Colors.white),
               label: const Text(
                 'الأذكار اليومية',
