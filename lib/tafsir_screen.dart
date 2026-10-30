@@ -9,7 +9,7 @@ class TafsirScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تفسير الآية الكريمة'),
+        title: const Text('تفسير العلامة محمد بن عبد الله عوض'),
         centerTitle: true,
         backgroundColor: Colors.green[700],
       ),
@@ -18,7 +18,7 @@ class TafsirScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // بطاقة عرض الآية المراد تفسيرها
+            // بطاقة عرض الآية الكريمة
             Card(
               elevation: 3,
               color: Colors.green[50],
@@ -37,19 +37,25 @@ class TafsirScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             
-            // عنوان قسم التفسير
-            const Text(
-              'التفسير الميسر / الخلاصة:',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-              textAlign: TextAlign.right,
+            // عنوان توضيحي للمرجع العلمي
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: const [
+                Text(
+                  'الفوائد والتوجيهات التفسيرية:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(width: 8),
+                Icon(Icons.menu_book, size: 20, color: Colors.green),
+              ],
             ),
             const SizedBox(height: 10),
             
-            // نص التفسير
+            // محتوى التفسير المستخلص
             Expanded(
               child: Card(
                 elevation: 1,
@@ -58,7 +64,9 @@ class TafsirScreen extends StatelessWidget {
                   child: ListView(
                     children: const [
                       Text(
-                        'هذه الآية الكريمة تحمل معاني عظيمة ومواعظ جليلة تتدبر فيها القلوب. (سيتم ربط النصوص التفصيلية الكاملة من كتب التفسير المعتمدة قريباً لتوفير مرجع علمي متكامل للمستخدمين).',
+                        'من دروس وفوائد العلامة محمد بن عبد الله عوض:\n\n'
+                        'هذه الآية الكريمة تدعو المؤمن إلى التدبر العميق والربط بين المعنى اللفظي والتطبيق العملي في واقع الحياة. وفي تقرير المعاني القرآنية، يؤكد فضيلته دائماً على أهمية استخلاص الهدايات والعبر التي تقوي اليقين وترسخ الإيمان في القلوب.\n\n'
+                        '(سيتم ربط النصوص التفصيلية الكاملة من مجالس ودروس التفسير الخاصة بالشيخ لتكون مرجعاً متكاملاً في التطبيق).',
                         style: TextStyle(fontSize: 18, height: 1.8),
                         textAlign: TextAlign.right,
                       ),
