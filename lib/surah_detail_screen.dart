@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'quran_data.dart';
+import 'tafsir_screen.dart'; // استيراد ملف شاشة التفسير
 
 class SurahDetailScreen extends StatelessWidget {
   final String surahName;
@@ -27,16 +28,23 @@ class SurahDetailScreen extends StatelessWidget {
                 style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
               const Divider(height: 20),
+              
+              // خيار التفسير (محدث لينتقل لشاشة التفسير الفعلية)
               ListTile(
                 leading: const Icon(Icons.book, color: Colors.green),
                 title: const Text('تفسير الآية'),
                 onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('جاري فتح التفسير...')),
+                  Navigator.pop(context); // إغلاق القائمة المنسدلة
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TafsirScreen(ayahText: ayahText),
+                    ),
                   );
                 },
               ),
+              
+              // خيار قراءة الآية (تلاوة)
               ListTile(
                 leading: const Icon(Icons.volume_up, color: Colors.blue),
                 title: const Text('قراءة الآية (تلاوة)'),
@@ -47,6 +55,8 @@ class SurahDetailScreen extends StatelessWidget {
                   );
                 },
               ),
+              
+              // خيار نسخ الآية
               ListTile(
                 leading: const Icon(Icons.copy, color: Colors.orange),
                 title: const Text('نسخ الآية'),
@@ -66,7 +76,6 @@ class SurahDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // البحث عن السورة المطابقة للأسماء الموجودة في قاعدة البيانات
     final surah = QuranData.surahsWithAyat.firstWhere(
       (s) => s['name'] == surahName,
       orElse: () => {
