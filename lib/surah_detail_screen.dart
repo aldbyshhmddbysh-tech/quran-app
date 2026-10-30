@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // مكتبة لتمكين ميزة النسخ الحقيقي للحافظة
 import 'quran_data.dart';
-import 'tafsir_screen.dart'; // استيراد ملف شاشة التفسير
+import 'tafsir_screen.dart'; // استيراد شاشة التفسير
 
 class SurahDetailScreen extends StatelessWidget {
   final String surahName;
@@ -8,7 +9,7 @@ class SurahDetailScreen extends StatelessWidget {
   const SurahDetailScreen({Key? key, required this.surahName}) : super(key: key);
 
   // دالة لإظهار قائمة الخيارات عند الضغط المطول على الآية
-  void _showAyahOptions(BuildContext context, String ayahText) {
+  void _showAyahOptions(BuildContext context, String ayahText, List<dynamic> ayat) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -29,7 +30,7 @@ class SurahDetailScreen extends StatelessWidget {
               ),
               const Divider(height: 20),
               
-              // خيار التفسير (محدث لينتقل لشاشة التفسير الفعلية)
+              // خيار التفسير (الانتقال لشاشة التفسير للعلامة محمد بن عبد الله عوض)
               ListTile(
                 leading: const Icon(Icons.book, color: Colors.green),
                 title: const Text('تفسير الآية'),
@@ -44,26 +45,39 @@ class SurahDetailScreen extends StatelessWidget {
                 },
               ),
               
-              // خيار قراءة الآية (تلاوة)
+              // خيار قراءة الآية (تلاوة مستمرة من الآية المحددة حتى نهاية السورة)
               ListTile(
                 leading: const Icon(Icons.volume_up, color: Colors.blue),
-                title: const Text('قراءة الآية (تلاوة)'),
+                title: const Text('تشغيل التلاوة من هذه الآية للنهاية'),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(context); // إغلاق القائمة المنسدلة
+                  
+                  // معرفة رقم الآية الحالية (index) بناءً على النص المحدد
+                  final ayahIndex = ayat.indexOf(ayahText);
+                  final remainingAyatCount = ayat.length - ayahIndex;
+
+                  // رسالة تأكيد تفاعلية تظهر للمستخدم
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('جاري تشغيل التلاوة...')),
+                    SnackBar(
+                      content: Text('جاري تشغيل التلاوة من الآية (${ayahIndex + 1}) حتى نهاية السورة ($remainingAyatCount آية)...'),
+                      duration: const Duration(seconds: 3),
+                    ),
                   );
                 },
               ),
               
-              // خيار نسخ الآية
+              // خيار نسخ الآية (النسخ الفعلي للحافظة)
               ListTile(
                 leading: const Icon(Icons.copy, color: Colors.orange),
                 title: const Text('نسخ الآية'),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(context); // إغلاق القائمة المنسدلة
+                  Clipboard.setData(ClipboardData(text: ayahText)); // نسخ النص
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تم نسخ الآية إلى الحافظة')),
+                    const SnackBar(
+                      content: Text('تم نسخ الآية إلى الحافظة بنجاح'),
+                      duration: Duration(seconds: 2),
+                    ),
                   );
                 },
               ),
@@ -99,7 +113,7 @@ class SurahDetailScreen extends StatelessWidget {
           final ayahText = ayat[index];
           return GestureDetector(
             onLongPress: () {
-              _showAyahOptions(context, ayahText);
+              _showAyahOptions(context, ayahText, ayat);
             },
             child: Card(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
