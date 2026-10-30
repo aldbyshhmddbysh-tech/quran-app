@@ -1,54 +1,127 @@
 import 'package:flutter/material.dart';
+import 'quran_data.dart';
 
 class SurahDetailScreen extends StatelessWidget {
   final String surahName;
 
   const SurahDetailScreen({Key? key, required this.surahName}) : super(key: key);
 
+  // دالة لإظهار قائمة الخيارات عند الضغط المطول على الآية
+  void _showAyahOptions(BuildContext context, String ayahText) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                ayahText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              ),
+              const Divider(height: 20),
+              ListTile(
+                leading: const Icon(Icons.book, color: Colors.green),
+                title: const Text('تفسير الآية'),
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('جاري فتح التفسير...')),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.volume_up, color: Colors.blue),
+                title: const Text('قراءة الآية (تلاوة)'),
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('جاري تشغيل التلاوة...')),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy, color: Colors.orange),
+                title: const Text('نسخ الآية'),
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('تم نسخ الآية إلى الحافظة')),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // البحث عن السورة المطابقة للأسماء الموجودة في قاعدة البيانات
+    final surah = QuranData.surahsWithAyat.firstWhere(
+      (s) => s['name'] == surahName,
+      orElse: () => {
+        'name': surahName,
+        'type': 'غير محدد',
+        'ayat': ['بسم الله الرحمن الرحيم', 'هذه عينة تجريبية للآيات في هذه السورة...']
+      },
+    );
+
+    final List<dynamic> ayat = surah['ayat'];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(surahName),
         centerTitle: true,
         backgroundColor: Colors.green[700],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // البسملة الجميلة في أعلى السورة (باستثناء سورة التوبة)
-            if (surahName != 'سورة التوبة')
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
-                child: Text(
-                  'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green[800],
-                    fontFamily: 'Amiri', // خط عربي جمالي إن وجد
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            
-            // مساحة لعرض الآيات مستقبلاً
-            Expanded(
-              child: Center(
-                child: Text(
-                  'جاري تحميل آيات $surahName...',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey[600],
-                  ),
-                  textAlign: TextAlign.center,
+      body: ListView.builder(
+        itemCount: ayat.length,
+        itemBuilder: (context, index) {
+          final ayahText = ayat[index];
+          return GestureDetector(
+            onLongPress: () {
+              _showAyahOptions(context, ayahText);
+            },
+            child: Card(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.green[100],
+                      radius: 14,
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(fontSize: 12, color: Colors.green[800], fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        ayahText,
+                        style: const TextStyle(fontSize: 18, height: 1.6),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
