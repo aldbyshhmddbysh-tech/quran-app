@@ -1,11 +1,32 @@
-import 'surah_detail_screen.dart';
-
 import 'package:flutter/material.dart';
+import 'surah_detail_screen.dart';
+import 'quick_jump_screen.dart';
 
-class QuranScreen extends StatelessWidget {
+class QuranScreen extends StatefulWidget {
   const QuranScreen({Key? key}) : super(key: key);
 
-  final List<Map<String, String>> surahs = const [
+  @override
+  _QuranScreenState createState() => _QuranScreenState();
+}
+
+class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    // 4 تبويبات علوية: السور، الجزء، المرجعيات، التصنيفات
+    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  // قائمة السور الكاملة الخاصة بك
+  final List> surahs = const [
     {'name': 'سورة الفاتحة', 'type': 'مكية', 'verses': '7 آيات'},
     {'name': 'سورة البقرة', 'type': 'مدنية', 'verses': '286 آية'},
     {'name': 'سورة آل عمران', 'type': 'مدنية', 'verses': '200 آية'},
@@ -126,55 +147,118 @@ class QuranScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('القرآن الكريم'),
+        title: const Text('قراءة وتفسير أهل البيت (ع)'),
         centerTitle: true,
         backgroundColor: Colors.green[700],
-      ),
-      body: ListView.builder(
-        itemCount: surahs.length,
-        padding: const EdgeInsets.all(12.0),
-        itemBuilder: (context, index) {
-          final surah = surahs[index];
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.green[100],
-                child: Text(
-                  '${index + 1}',
-                  style: TextStyle(
-                    color: Colors.green[800],
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              title: Text(
-                surah['name']!,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              subtitle: Text(
-                '${surah['type']} • ${surah['verses']}',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.green),
-              onTap: () {
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'search') {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('تم اختيار ${surah['name']}'),
-                    duration: const Duration(seconds: 1),
+                  const SnackBar(content: Text('فتح نافذة البحث')),
+                );
+              } else if (value == 'quick_jump') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const QuickJumpScreen(),
                   ),
                 );
-              },
-            ),
-          );
-        },
+              } else if (value == 'settings') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('فتح الإعدادات')),
+                );
+              } else if (value == 'help') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('المساعدة')),
+                );
+              } else if (value == 'about') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('عنا')),
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(value: 'search', child: Text('بحث', textAlign: TextAlign.right)),
+              const PopupMenuItem<String>(value: 'quick_jump', child: Text('انتقال سريع', textAlign: TextAlign.right)),
+              const PopupMenuItem<String>(value: 'settings', child: Text('الإعدادات', textAlign: TextAlign.right)),
+              const PopupMenuItem<String>(value: 'help', child: Text('مساعدة', textAlign: TextAlign.right)),
+              const PopupMenuItem<String>(value: 'about', child: Text('عنا', textAlign: TextAlign.right)),
+            ],
+          ),
+        ],
+        // شريط التبويبات الأربعة (السور، الجزء، المرجعيات، التصنيفات)
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          tabs: const [
+            Tab(text: 'السور'),
+            Tab(text: 'الجزء'),
+            Tab(text: 'المرجعيات'),
+            Tab(text: 'التصنيفات'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          // 1. تبويب السور
+          ListView.builder(
+            itemCount: surahs.length,
+            padding: const EdgeInsets.all(12.0),
+            itemBuilder: (context, index) {
+              final surah = surahs[index];
+              return Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.green[100],
+                    child: Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        color: Colors.green[800],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    surah['name']!,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${surah['type']} • ${surah['verses']}',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.green),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SurahDetailScreen(surahName: surah['name']!),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+          
+          // 2. تبويب الأجزاء
+          const Center(child: Text('قائمة الأجزاء', style: TextStyle(fontSize: 18))),
+          
+          // 3. تبويب المرجعيات (بعد تصحيح الكلمة)
+          const Center(child: Text('المرجعيات المحفوظة', style: TextStyle(fontSize: 18))),
+          
+          // 4. تبويب التصنيفات
+          const Center(child: Text('التصنيفات الموضوعية', style: TextStyle(fontSize: 18))),
+        ],
       ),
     );
   }
