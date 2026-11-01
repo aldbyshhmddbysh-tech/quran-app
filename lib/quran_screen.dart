@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'surah_detail_screen.dart';
 import 'quick_jump_screen.dart';
+import 'settings_screen.dart'; // استيراد شاشة الإعدادات التي أنشأناها
 
 class QuranScreen extends StatefulWidget {
   const QuranScreen({Key? key}) : super(key: key);
@@ -11,6 +12,7 @@ class QuranScreen extends StatefulWidget {
 
 class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _isDarkMode = false; // متغير حالة الوضع الليلي/النهاري
 
   @override
   void initState() {
@@ -145,120 +147,134 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('قراءة وتفسير أهل البيت (ع)'),
-        centerTitle: true,
-        backgroundColor: Colors.green[700],
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'search') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('فتح نافذة البحث')),
-                );
-              } else if (value == 'quick_jump') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const QuickJumpScreen(),
-                  ),
-                );
-              } else if (value == 'settings') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('فتح الإعدادات')),
-                );
-              } else if (value == 'help') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('المساعدة')),
-                );
-              } else if (value == 'about') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('عنا')),
-                );
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(value: 'search', child: Text('بحث', textAlign: TextAlign.right)),
-              const PopupMenuItem<String>(value: 'quick_jump', child: Text('انتقال سريع', textAlign: TextAlign.right)),
-              const PopupMenuItem<String>(value: 'settings', child: Text('الإعدادات', textAlign: TextAlign.right)),
-              const PopupMenuItem<String>(value: 'help', child: Text('مساعدة', textAlign: TextAlign.right)),
-              const PopupMenuItem<String>(value: 'about', child: Text('عنا', textAlign: TextAlign.right)),
+    return Theme(
+      data: _isDarkMode ? ThemeData.dark() : ThemeData.light(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('قراءة وتفسير أهل البيت (ع)'),
+          centerTitle: true,
+          backgroundColor: _isDarkMode ? Colors.grey[900] : Colors.green[700],
+          actions: [
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'search') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('فتح نافذة البحث')),
+                  );
+                } else if (value == 'quick_jump') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const QuickJumpScreen(),
+                    ),
+                  );
+                } else if (value == 'settings') {
+                  // الانتقال الفعلي إلى شاشة الإعدادات وتمرير حالة الثيم
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingsScreen(
+                        isDarkMode: _isDarkMode,
+                        onThemeChanged: (bool value) {
+                          setState(() {
+                            _isDarkMode = value;
+                          });
+                        },
+                      ),
+                    ),
+                  );
+                } else if (value == 'help') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('المساعدة')),
+                  );
+                } else if (value == 'about') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('عنا')),
+                  );
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(value: 'search', child: Text('بحث', textAlign: TextAlign.right)),
+                const PopupMenuItem<String>(value: 'quick_jump', child: Text('انتقال سريع', textAlign: TextAlign.right)),
+                const PopupMenuItem<String>(value: 'settings', child: Text('الإعدادات', textAlign: TextAlign.right)),
+                const PopupMenuItem<String>(value: 'help', child: Text('مساعدة', textAlign: TextAlign.right)),
+                const PopupMenuItem<String>(value: 'about', child: Text('عنا', textAlign: TextAlign.right)),
+              ],
+            ),
+          ],
+          // شريط التبويبات الأربعة (السور، الجزء، المرجعيات، التصنيفات)
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: Colors.white,
+            tabs: const [
+              Tab(text: 'السور'),
+              Tab(text: 'الجزء'),
+              Tab(text: 'المرجعيات'),
+              Tab(text: 'التصنيفات'),
             ],
           ),
-        ],
-        // شريط التبويبات الأربعة (السور، الجزء، المرجعيات، التصنيفات)
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          tabs: const [
-            Tab(text: 'السور'),
-            Tab(text: 'الجزء'),
-            Tab(text: 'المرجعيات'),
-            Tab(text: 'التصنيفات'),
-          ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // 1. تبويب السور
-          ListView.builder(
-            itemCount: surahs.length,
-            padding: const EdgeInsets.all(12.0),
-            itemBuilder: (context, index) {
-              final surah = surahs[index];
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.green[100],
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        color: Colors.green[800],
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            // 1. تبويب السور
+            ListView.builder(
+              itemCount: surahs.length,
+              padding: const EdgeInsets.all(12.0),
+              itemBuilder: (context, index) {
+                final surah = surahs[index];
+                return Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: _isDarkMode ? Colors.grey[800] : Colors.green[100],
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: _isDarkMode ? Colors.greenAccent : Colors.green[800],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      surah['name']!,
+                      style: const TextStyle(
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  title: Text(
-                    surah['name']!,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    subtitle: Text(
+                      '${surah['type']} • ${surah['verses']}',
+                      style: TextStyle(color: _isDarkMode ? Colors.grey[400] : Colors.grey[600]),
                     ),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 16, color: _isDarkMode ? Colors.greenAccent : Colors.green),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SurahDetailScreen(surahName: surah['name']!),
+                        ),
+                      );
+                    },
                   ),
-                  subtitle: Text(
-                    '${surah['type']} • ${surah['verses']}',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.green),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SurahDetailScreen(surahName: surah['name']!),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-          
-          // 2. تبويب الأجزاء
-          const Center(child: Text('قائمة الأجزاء', style: TextStyle(fontSize: 18))),
-          
-          // 3. تبويب المرجعيات (بعد تصحيح الكلمة)
-          const Center(child: Text('المرجعيات المحفوظة', style: TextStyle(fontSize: 18))),
-          
-          // 4. تبويب التصنيفات
-          const Center(child: Text('التصنيفات الموضوعية', style: TextStyle(fontSize: 18))),
-        ],
+                );
+              },
+            ),
+            
+            // 2. تبويب الأجزاء
+            const Center(child: Text('قائمة الأجزاء', style: TextStyle(fontSize: 18))),
+            
+            // 3. تبويب المرجعيات
+            const Center(child: Text('المرجعيات المحفوظة', style: TextStyle(fontSize: 18))),
+            
+            // 4. تبويب التصنيفات
+            const Center(child: Text('التصنيفات الموضوعية', style: TextStyle(fontSize: 18))),
+          ],
+        ),
       ),
     );
   }
