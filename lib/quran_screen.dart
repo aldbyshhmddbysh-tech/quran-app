@@ -262,4 +262,4 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
       ),
     );
   }
-}ب
+}
