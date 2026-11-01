@@ -1,211 +1,280 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // مكتبة لتمكين ميزة النسخ الحقيقي للحافظة
-import 'quran_data.dart';
-import 'tafsir_screen.dart'; // استيراد شاشة التفسير
+import 'surah_detail_screen.dart';
+import 'quick_jump_screen.dart';
+import 'settings_screen.dart'; // شاشة الإعدادات والوضع الليلي
 
-class SurahDetailScreen extends StatelessWidget {
-  final String surahName;
+class QuranScreen extends StatefulWidget {
+  const QuranScreen({Key? key}) : super(key: key);
 
-  const SurahDetailScreen({Key? key, required this.surahName}) : super(key: key);
+  @override
+  _QuranScreenState createState() => _QuranScreenState();
+}
 
-  // دالة لإظهار قائمة الخيارات عند الضغط المطول على الآية
-  void _showAyahOptions(BuildContext context, String ayahText, List<dynamic> ayat) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
-      ),
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                ayahText,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.grey[600], fontSize: 14),
-              ),
-              const Divider(height: 20),
-              
-              // خيار التفسير (الانتقال لشاشة التفسير للعلامة محمد بن عبد الله عوض)
-              ListTile(
-                leading: const Icon(Icons.book, color: Colors.green),
-                title: const Text('تفسير الآية'),
-                onTap: () {
-                  Navigator.pop(context); // إغلاق القائمة المنسدلة
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TafsirScreen(ayahText: ayahText),
-                    ),
-                  );
-                },
-              ),
-              
-              // خيار قراءة الآية (تلاوة مستمرة من الآية المحددة حتى نهاية السورة)
-              ListTile(
-                leading: const Icon(Icons.volume_up, color: Colors.blue),
-                title: const Text('تشغيل التلاوة من هذه الآية للنهاية'),
-                onTap: () {
-                  Navigator.pop(context); // إغلاق القائمة المنسدلة
-                  
-                  // معرفة رقم الآية الحالية (index) بناءً على النص المحدد
-                  final ayahIndex = ayat.indexOf(ayahText);
-                  final remainingAyatCount = ayat.length - ayahIndex;
+class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  bool _isDarkMode = false; // متغير حالة الوضع الليلي
 
-                  // رسالة تأكيد تفاعلية تظهر للمستخدم
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('جاري تشغيل التلاوة من الآية (${ayahIndex + 1}) حتى نهاية السورة ($remainingAyatCount آية)...'),
-                      duration: const Duration(seconds: 3),
-                    ),
-                  );
-                },
-              ),
-              
-              // خيار نسخ الآية (النسخ الفعلي للحافظة)
-              ListTile(
-                leading: const Icon(Icons.copy, color: Colors.orange),
-                title: const Text('نسخ الآية'),
-                onTap: () {
-                  Navigator.pop(context); // إغلاق القائمة المنسدلة
-                  Clipboard.setData(ClipboardData(text: ayahText)); // نسخ النص
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('تم نسخ الآية إلى الحافظة بنجاح'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+    // 4 تبويبات علوية: السور، الجزء، المرجعيات، التصنيفات
+    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  // قائمة السور الكاملة
+  final List> surahs = const [
+    {'name': 'سورة الفاتحة', 'type': 'مكية', 'verses': '7 آيات'},
+    {'name': 'سورة البقرة', 'type': 'مدنية', 'verses': '286 آية'},
+    {'name': 'سورة آل عمران', 'type': 'مدنية', 'verses': '200 آية'},
+    {'name': 'سورة النساء', 'type': 'مدنية', 'verses': '176 آية'},
+    {'name': 'سورة المائدة', 'type': 'مدنية', 'verses': '120 آية'},
+    {'name': 'سورة الأنعام', 'type': 'مكية', 'verses': '165 آية'},
+    {'name': 'سورة الأعراف', 'type': 'مكية', 'verses': '206 آية'},
+    {'name': 'سورة الأنفال', 'type': 'مدنية', 'verses': '75 آية'},
+    {'name': 'سورة التوبة', 'type': 'مدنية', 'verses': '129 آية'},
+    {'name': 'سورة يونس', 'type': 'مكية', 'verses': '109 آية'},
+    {'name': 'سورة هود', 'type': 'مكية', 'verses': '123 آية'},
+    {'name': 'سورة يوسف', 'type': 'مكية', 'verses': '111 آية'},
+    {'name': 'سورة الرعد', 'type': 'مدنية', 'verses': '43 آية'},
+    {'name': 'سورة إبراهيم', 'type': 'مكية', 'verses': '52 آية'},
+    {'name': 'سورة الحجر', 'type': 'مكية', 'verses': '99 آية'},
+    {'name': 'سورة النحل', 'type': 'مكية', 'verses': '128 آية'},
+    {'name': 'سورة الإسراء', 'type': 'مكية', 'verses': '111 آية'},
+    {'name': 'سورة الكهف', 'type': 'مكية', 'verses': '110 آية'},
+    {'name': 'سورة مريم', 'type': 'مكية', 'verses': '98 آية'},
+    {'name': 'سورة طه', 'type': 'مكية', 'verses': '135 آية'},
+    {'name': 'سورة الأنبياء', 'type': 'مكية', 'verses': '112 آية'},
+    {'name': 'سورة الحج', 'type': 'مدنية', 'verses': '78 آية'},
+    {'name': 'سورة المؤمنون', 'type': 'مكية', 'verses': '118 آية'},
+    {'name': 'سورة النور', 'type': 'مدنية', 'verses': '64 آية'},
+    {'name': 'سورة الفرقان', 'type': 'مكية', 'verses': '77 آية'},
+    {'name': 'سورة الشعراء', 'type': 'مكية', 'verses': '227 آية'},
+    {'name': 'سورة النمل', 'type': 'مكية', 'verses': '93 آية'},
+    {'name': 'سورة القصص', 'type': 'مكية', 'verses': '88 آية'},
+    {'name': 'سورة العنكبوت', 'type': 'مكية', 'verses': '69 آية'},
+    {'name': 'سورة الروم', 'type': 'مكية', 'verses': '60 آية'},
+    {'name': 'سورة لقمان', 'type': 'مكية', 'verses': '34 آية'},
+    {'name': 'سورة السجدة', 'type': 'مكية', 'verses': '30 آية'},
+    {'name': 'سورة الأحزاب', 'type': 'مدنية', 'verses': '73 آية'},
+    {'name': 'سورة سبأ', 'type': 'مكية', 'verses': '54 آية'},
+    {'name': 'سورة فاطر', 'type': 'مكية', 'verses': '45 آية'},
+    {'name': 'سورة يس', 'type': 'مكية', 'verses': '83 آية'},
+    {'name': 'سورة الصافات', 'type': 'مكية', 'verses': '182 آية'},
+    {'name': 'سورة ص', 'type': 'مكية', 'verses': '88 آية'},
+    {'name': 'سورة الزمر', 'type': 'مكية', 'verses': '75 آية'},
+    {'name': 'سورة غافر', 'type': 'مكية', 'verses': '85 آية'},
+    {'name': 'سورة فصلت', 'type': 'مكية', 'verses': '54 آية'},
+    {'name': 'سورة الشورى', 'type': 'مكية', 'verses': '53 آية'},
+    {'name': 'سورة الزخرف', 'type': 'مكية', 'verses': '89 آية'},
+    {'name': 'سورة الدخان', 'type': 'مكية', 'verses': '59 آية'},
+    {'name': 'سورة الجاثية', 'type': 'مكية', 'verses': '37 آية'},
+    {'name': 'سورة الأحقاف', 'type': 'مكية', 'verses': '35 آية'},
+    {'name': 'سورة محمد', 'type': 'مدنية', 'verses': '38 آية'},
+    {'name': 'سورة الفتح', 'type': 'مدنية', 'verses': '29 آية'},
+    {'name': 'سورة الحجرات', 'type': 'مدنية', 'verses': '18 آية'},
+    {'name': 'سورة ق', 'type': 'مكية', 'verses': '45 آية'},
+    {'name': 'سورة الذاريات', 'type': 'مكية', 'verses': '60 آية'},
+    {'name': 'سورة الطور', 'type': 'مكية', 'verses': '49 آية'},
+    {'name': 'سورة النجم', 'type': 'مكية', 'verses': '62 آية'},
+    {'name': 'سورة القمر', 'type': 'مكية', 'verses': '55 آية'},
+    {'name': 'سورة الرحمن', 'type': 'مدنية', 'verses': '78 آية'},
+    {'name': 'سورة الواقعة', 'type': 'مكية', 'verses': '96 آية'},
+    {'name': 'سورة الحديد', 'type': 'مدنية', 'verses': '29 آية'},
+    {'name': 'سورة المجادلة', 'type': 'مدنية', 'verses': '22 آية'},
+    {'name': 'سورة الحشر', 'type': 'مدنية', 'verses': '24 آية'},
+    {'name': 'سورة الممتحنة', 'type': 'مدنية', 'verses': '13 آية'},
+    {'name': 'سورة الصف', 'type': 'مدنية', 'verses': '14 آية'},
+    {'name': 'سورة الجمعة', 'type': 'مدنية', 'verses': '11 آية'},
+    {'name': 'سورة المنافقون', 'type': 'مدنية', 'verses': '11 آية'},
+    {'name': 'سورة التغابن', 'type': 'مدنية', 'verses': '18 آية'},
+    {'name': 'سورة الطلاق', 'type': 'مدنية', 'verses': '12 آية'},
+    {'name': 'سورة التحريم', 'type': 'مدنية', 'verses': '12 آية'},
+    {'name': 'سورة الملك', 'type': 'مكية', 'verses': '30 آية'},
+    {'name': 'سورة القلم', 'type': 'مكية', 'verses': '52 آية'},
+    {'name': 'سورة الحاقة', 'type': 'مكية', 'verses': '52 آية'},
+    {'name': 'سورة المعارج', 'type': 'مكية', 'verses': '44 آية'},
+    {'name': 'سورة نوح', 'type': 'مكية', 'verses': '28 آية'},
+    {'name': 'سورة الجن', 'type': 'مكية', 'verses': '28 آية'},
+    {'name': 'سورة المزمل', 'type': 'مكية', 'verses': '20 آية'},
+    {'name': 'سورة المدثر', 'type': 'مكية', 'verses': '56 آية'},
+    {'name': 'سورة القيامة', 'type': 'مكية', 'verses': '40 آية'},
+    {'name': 'سورة الإنسان', 'type': 'مدنية', 'verses': '31 آية'},
+    {'name': 'سورة المرسلات', 'type': 'مكية', 'verses': '50 آية'},
+    {'name': 'سورة النبأ', 'type': 'مكية', 'verses': '40 آية'},
+    {'name': 'سورة النازعات', 'type': 'مكية', 'verses': '46 آية'},
+    {'name': 'سورة عبس', 'type': 'مكية', 'verses': '42 آية'},
+    {'name': 'سورة التكوير', 'type': 'مكية', 'verses': '29 آية'},
+    {'name': 'سورة الانفطار', 'type': 'مكية', 'verses': '19 آية'},
+    {'name': 'سورة المطففين', 'type': 'مكية', 'verses': '36 آية'},
+    {'name': 'سورة الانشقاق', 'type': 'مكية', 'verses': '25 آية'},
+    {'name': 'سورة البروج', 'type': 'مكية', 'verses': '22 آية'},
+    {'name': 'سورة الطارق', 'type': 'مكية', 'verses': '17 آية'},
+    {'name': 'سورة الأعلى', 'type': 'مكية', 'verses': '19 آية'},
+    {'name': 'سورة الغاشية', 'type': 'مكية', 'verses': '26 آية'},
+    {'name': 'سورة الفجر', 'type': 'مكية', 'verses': '30 آية'},
+    {'name': 'سورة البلد', 'type': 'مكية', 'verses': '20 آية'},
+    {'name': 'سورة الشمس', 'type': 'مكية', 'verses': '15 آية'},
+    {'name': 'سورة الليل', 'type': 'مكية', 'verses': '21 آية'},
+    {'name': 'سورة الضحى', 'type': 'مكية', 'verses': '11 آية'},
+    {'name': 'سورة الشرح', 'type': 'مكية', 'verses': '8 آيات'},
+    {'name': 'سورة التين', 'type': 'مكية', 'verses': '8 آيات'},
+    {'name': 'سورة العلق', 'type': 'مكية', 'verses': '19 آية'},
+    {'name': 'سورة القدر', 'type': 'مكية', 'verses': '5 آيات'},
+    {'name': 'سورة البينة', 'type': 'مدنية', 'verses': '8 آيات'},
+    {'name': 'سورة الزلزلة', 'type': 'مدنية', 'verses': '8 آيات'},
+    {'name': 'سورة العاديات', 'type': 'مكية', 'verses': '11 آية'},
+    {'name': 'سورة القارعة', 'type': 'مكية', 'verses': '11 آية'},
+    {'name': 'سورة التكاثر', 'type': 'مكية', 'verses': '8 آيات'},
+    {'name': 'سورة العصر', 'type': 'مكية', 'verses': '3 آيات'},
+    {'name': 'سورة الهمزة', 'type': 'مكية', 'verses': '9 آيات'},
+    {'name': 'سورة الفيل', 'type': 'مكية', 'verses': '5 آيات'},
+    {'name': 'سورة قريش', 'type': 'مكية', 'verses': '4 آيات'},
+    {'name': 'سورة الماعون', 'type': 'مكية', 'verses': '7 آيات'},
+    {'name': 'سورة الكوثر', 'type': 'مكية', 'verses': '3 آيات'},
+    {'name': 'سورة الكافرون', 'type': 'مكية', 'verses': '6 آيات'},
+    {'name': 'سورة النصر', 'type': 'مدنية', 'verses': '3 آيات'},
+    {'name': 'سورة المسد', 'type': 'مكية', 'verses': '5 آيات'},
+    {'name': 'سورة الإخلاص', 'type': 'مكية', 'verses': '4 آيات'},
+    {'name': 'سورة الفلق', 'type': 'مكية', 'verses': '5 آيات'},
+    {'name': 'سورة الناس', 'type': 'مكية', 'verses': '6 آيات'},
+  ];
+
+  @override
   Widget build(BuildContext context) {
-    final surah = QuranData.surahsWithAyat.firstWhere(
-      (s) => s['name'] == surahName,
-      orElse: () => {
-        'name': surahName,
-        'type': 'غير محدد',
-        'ayat': ['بسم الله الرحمن الرحيم', 'هذه عينة تجريبية للآيات في هذه السورة...']
-      },
-    );
-
-    final List<dynamic> ayat = surah['ayat'];
-    final String surahType = surah['type'] ?? 'مكية';
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(surahName),
-        centerTitle: true,
-        backgroundColor: Colors.green[700],
-      ),
-      body: ListView.builder(
-        itemCount: ayat.length + 1, // أضفنا 1 لكي نعرض رأس السورة في البداية
-        itemBuilder: (context, index) {
-          // العنصر الأول هو رأس السورة المزخرف المطابق للمصحف الشريف
-          if (index == 0) {
-            return Container(
-              margin: const EdgeInsets.all(12.0),
-              padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 16.0),
-              decoration: BoxDecoration(
-                color: Colors.black, // خلفية سوداء داكنة مثل المصحف
-                border: Border.all(color: Colors.white75, width: 1.5), // إطار أنيق
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // عدد الآيات يسار الرأس
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white54),
-                      borderRadius: BorderRadius.circular(4),
+    return Theme(
+      data: _isDarkMode ? ThemeData.dark() : ThemeData.light(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('قراءة وتفسير أهل البيت (ع)'),
+          centerTitle: true,
+          backgroundColor: _isDarkMode ? Colors.grey[900] : Colors.green[700],
+          actions: [
+            // القائمة المنسدلة للخيارات العلوية (بحث، انتقال سريع، إعدادات، مساعدة، عنا)
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'search') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('فتح نافذة البحث')),
+                  );
+                } else if (value == 'quick_jump') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const QuickJumpScreen(),
                     ),
-                    child: Text(
-                      'آياتها ${ayat.length}',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                  
-                  // اسم السورة في المنتصف بخط بارز
-                  Expanded(
-                    child: Text(
-                      surahName,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 1.2,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  
-                  // نوع السورة (مكية/مدنية) يمين الرأس
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white54),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      surahType,
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          // بقية العناصر هي آيات السورة
-          final ayahIndex = index - 1;
-          final ayahText = ayat[ayahIndex];
-          
-          return GestureDetector(
-            onLongPress: () {
-              _showAyahOptions(context, ayahText, ayat);
-            },
-            child: Card(
-              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.green[100],
-                      radius: 14,
-                      child: Text(
-                        '${ayahIndex + 1}',
-                        style: TextStyle(fontSize: 12, color: Colors.green[800], fontWeight: FontWeight.bold),
+                  );
+                } else if (value == 'settings') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingsScreen(
+                        isDarkMode: _isDarkMode,
+                        onThemeChanged: (bool value) {
+                          setState(() {
+                            _isDarkMode = value;
+                          });
+                        },
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        ayahText,
-                        style: const TextStyle(fontSize: 18, height: 1.6),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  );
+                } else if (value == 'help') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('المساعدة')),
+                  );
+                } else if (value == 'about') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('عنا')),
+                  );
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(value: 'search', child: Text('بحث', textAlign: TextAlign.right)),
+                const PopupMenuItem<String>(value: 'quick_jump', child: Text('انتقال سريع', textAlign: TextAlign.right)),
+                const PopupMenuItem<String>(value: 'settings', child: Text('الإعدادات', textAlign: TextAlign.right)),
+                const PopupMenuItem<String>(value: 'help', child: Text('مساعدة', textAlign: TextAlign.right)),
+                const PopupMenuItem<String>(value: 'about', child: Text('عنا', textAlign: TextAlign.right)),
+              ],
             ),
-          );
-        },
+          ],
+          // شريط التبويبات الأربعة (السور، الجزء، المرجعيات، التصنيفات)
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: Colors.white,
+            tabs: const [
+              Tab(text: 'السور'),
+              Tab(text: 'الجزء'),
+              Tab(text: 'المرجعيات'),
+              Tab(text: 'التصنيفات'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            // 1. تبويب السور
+            ListView.builder(
+              itemCount: surahs.length,
+              padding: const EdgeInsets.all(12.0),
+              itemBuilder: (context, index) {
+                final surah = surahs[index];
+                return Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: _isDarkMode ? Colors.grey[800] : Colors.green[100],
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: _isDarkMode ? Colors.greenAccent : Colors.green[800],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      surah['name']!,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${surah['type']} • ${surah['verses']}',
+                      style: TextStyle(color: _isDarkMode ? Colors.grey[400] : Colors.grey[600]),
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 16, color: _isDarkMode ? Colors.greenAccent : Colors.green),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SurahDetailScreen(surahName: surah['name']!),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+            
+            // 2. تبويب الأجزاء
+            const Center(child: Text('قائمة الأجزاء', style: TextStyle(fontSize: 18))),
+            
+            // 3. تبويب المرجعيات
+            const Center(child: Text('المرجعيات المحفوظة', style: TextStyle(fontSize: 18))),
+            
+            // 4. تبويب التصنيفات
+            const Center(child: Text('التصنيفات الموضوعية', style: TextStyle(fontSize: 18))),
+          ],
+        ),
       ),
     );
   }
