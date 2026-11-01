@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'surah_detail_screen.dart';
 import 'quick_jump_screen.dart';
-import 'settings_screen.dart'; // استيراد شاشة الإعدادات التي أنشأناها
+import 'settings_screen.dart'; // شاشة الإعدادات والوضع الليلي
 
 class QuranScreen extends StatefulWidget {
   const QuranScreen({Key? key}) : super(key: key);
@@ -12,13 +12,13 @@ class QuranScreen extends StatefulWidget {
 
 class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _isDarkMode = false; // متغير حالة الوضع الليلي/النهاري
+  bool _isDarkMode = false; // متغير حالة الوضع الليلي
 
   @override
   void initState() {
     super.initState();
-    // 4 تبويبات علوية: السور، الجزء، المرجعيات، التصنيفات
-    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
+    // 5 تبويبات علوية: السور، الأجزاء، الأحزاب، المرجعيات، التصنيفات
+    _tabController = TabController(length: 5, vsync: this, initialIndex: 0);
   }
 
   @override
@@ -27,7 +27,7 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
     super.dispose();
   }
 
-  // قائمة السور الكاملة الخاصة بك
+  // قائمة السور الكاملة
   final List> surahs = const [
     {'name': 'سورة الفاتحة', 'type': 'مكية', 'verses': '7 آيات'},
     {'name': 'سورة البقرة', 'type': 'مدنية', 'verses': '286 آية'},
@@ -169,7 +169,6 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
                     ),
                   );
                 } else if (value == 'settings') {
-                  // الانتقال الفعلي إلى شاشة الإعدادات وتمرير حالة الثيم
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -202,13 +201,15 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
               ],
             ),
           ],
-          // شريط التبويبات الأربعة (السور، الجزء، المرجعيات، التصنيفات)
+          // شريط التبويبات الخمسة (السور، الجزء، الأحزاب، المرجعيات، التصنيفات)
           bottom: TabBar(
             controller: _tabController,
+            isScrollable: true, // لكي تتسع التبويبات الخمسة بسلاسة في الشاشة
             indicatorColor: Colors.white,
             tabs: const [
               Tab(text: 'السور'),
               Tab(text: 'الجزء'),
+              Tab(text: 'الأحزاب'),
               Tab(text: 'المرجعيات'),
               Tab(text: 'التصنيفات'),
             ],
@@ -267,11 +268,14 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
             
             // 2. تبويب الأجزاء
             const Center(child: Text('قائمة الأجزاء', style: TextStyle(fontSize: 18))),
+
+            // 3. تبويب الأحزاب
+            const Center(child: Text('قائمة الأحزاب', style: TextStyle(fontSize: 18))),
             
-            // 3. تبويب المرجعيات
+            // 4. تبويب المرجعيات
             const Center(child: Text('المرجعيات المحفوظة', style: TextStyle(fontSize: 18))),
             
-            // 4. تبويب التصنيفات
+            // 5. تبويب التصنيفات
             const Center(child: Text('التصنيفات الموضوعية', style: TextStyle(fontSize: 18))),
           ],
         ),
