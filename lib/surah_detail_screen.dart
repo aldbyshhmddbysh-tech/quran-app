@@ -17,8 +17,8 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    // 4 تبويبات علوية: السور، الجزء، المرجعيات، التصنيفات
-    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
+    // 5 تبويبات علوية: السور، الأجزاء، الأحزاب، المرجعيات، التصنيفات
+    _tabController = TabController(length: 5, vsync: this, initialIndex: 0);
   }
 
   @override
@@ -155,7 +155,6 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
           centerTitle: true,
           backgroundColor: _isDarkMode ? Colors.grey[900] : Colors.green[700],
           actions: [
-            // القائمة المنسدلة للخيارات العلوية (بحث، انتقال سريع، إعدادات، مساعدة، عنا)
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'search') {
@@ -202,13 +201,15 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
               ],
             ),
           ],
-          // شريط التبويبات الأربعة (السور، الجزء، المرجعيات، التصنيفات)
+          // شريط التبويبات الخمسة (السور، الجزء، الأحزاب، المرجعيات، التصنيفات)
           bottom: TabBar(
             controller: _tabController,
+            isScrollable: true, // لكي تتسع التبويبات الخمسة بسلاسة في الشاشة
             indicatorColor: Colors.white,
             tabs: const [
               Tab(text: 'السور'),
               Tab(text: 'الجزء'),
+              Tab(text: 'الأحزاب'),
               Tab(text: 'المرجعيات'),
               Tab(text: 'التصنيفات'),
             ],
@@ -267,11 +268,14 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
             
             // 2. تبويب الأجزاء
             const Center(child: Text('قائمة الأجزاء', style: TextStyle(fontSize: 18))),
+
+            // 3. تبويب الأحزاب
+            const Center(child: Text('قائمة الأحزاب', style: TextStyle(fontSize: 18))),
             
-            // 3. تبويب المرجعيات
+            // 4. تبويب المرجعيات
             const Center(child: Text('المرجعيات المحفوظة', style: TextStyle(fontSize: 18))),
             
-            // 4. تبويب التصنيفات
+            // 5. تبويب التصنيفات
             const Center(child: Text('التصنيفات الموضوعية', style: TextStyle(fontSize: 18))),
           ],
         ),
