@@ -100,6 +100,7 @@ class SurahDetailScreen extends StatelessWidget {
     );
 
     final List<dynamic> ayat = surah['ayat'];
+    final String surahType = surah['type'] ?? 'مكية';
 
     return Scaffold(
       appBar: AppBar(
@@ -108,9 +109,69 @@ class SurahDetailScreen extends StatelessWidget {
         backgroundColor: Colors.green[700],
       ),
       body: ListView.builder(
-        itemCount: ayat.length,
+        itemCount: ayat.length + 1, // أضفنا 1 لكي نعرض رأس السورة في البداية
         itemBuilder: (context, index) {
-          final ayahText = ayat[index];
+          // العنصر الأول هو رأس السورة المزخرف المطابق للمصحف الشريف
+          if (index == 0) {
+            return Container(
+              margin: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 16.0),
+              decoration: BoxDecoration(
+                color: Colors.black, // خلفية سوداء داكنة مثل المصحف
+                border: Border.all(color: Colors.white75, width: 1.5), // إطار أنيق
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // عدد الآيات يسار الرأس
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white54),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'آياتها ${ayat.length}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                  
+                  // اسم السورة في المنتصف بخط بارز
+                  Expanded(
+                    child: Text(
+                      surahName,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1.2,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  
+                  // نوع السورة (مكية/مدنية) يمين الرأس
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white54),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      surahType,
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // بقية العناصر هي آيات السورة
+          final ayahIndex = index - 1;
+          final ayahText = ayat[ayahIndex];
+          
           return GestureDetector(
             onLongPress: () {
               _showAyahOptions(context, ayahText, ayat);
@@ -127,7 +188,7 @@ class SurahDetailScreen extends StatelessWidget {
                       backgroundColor: Colors.green[100],
                       radius: 14,
                       child: Text(
-                        '${index + 1}',
+                        '${ayahIndex + 1}',
                         style: TextStyle(fontSize: 12, color: Colors.green[800], fontWeight: FontWeight.bold),
                       ),
                     ),
