@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'surah_detail_screen.dart';
 import 'quick_jump_screen.dart';
-import 'settings_screen.dart'; // شاشة الإعدادات والوضع الليلي
+import 'settings_screen.dart';
 
 class QuranScreen extends StatefulWidget {
   const QuranScreen({Key? key}) : super(key: key);
@@ -12,12 +12,12 @@ class QuranScreen extends StatefulWidget {
 
 class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _isDarkMode = false; // متغير حالة الوضع الليلي
+  bool _isDarkMode = false;
+  String _selectedReciter = 'الشيخ عبد الباسط عبد الصمد';
 
   @override
   void initState() {
     super.initState();
-    // 5 تبويبات علوية: السور، الأجزاء، الأحزاب، المرجعيات، التصنيفات
     _tabController = TabController(length: 5, vsync: this, initialIndex: 0);
   }
 
@@ -27,7 +27,6 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
     super.dispose();
   }
 
-  // قائمة السور الكاملة
   final List> surahs = const [
     {'name': 'سورة الفاتحة', 'type': 'مكية', 'verses': '7 آيات'},
     {'name': 'سورة البقرة', 'type': 'مدنية', 'verses': '286 آية'},
@@ -158,16 +157,9 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'search') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('فتح نافذة البحث')),
-                  );
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('فتح نافذة البحث')));
                 } else if (value == 'quick_jump') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const QuickJumpScreen(),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const QuickJumpScreen()));
                 } else if (value == 'settings') {
                   Navigator.push(
                     context,
@@ -179,17 +171,19 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
                             _isDarkMode = value;
                           });
                         },
+                        selectedReciter: _selectedReciter,
+                        onReciterChanged: (String newReciter) {
+                          setState(() {
+                            _selectedReciter = newReciter;
+                          });
+                        },
                       ),
                     ),
                   );
                 } else if (value == 'help') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('المساعدة')),
-                  );
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('المساعدة')));
                 } else if (value == 'about') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('عنا')),
-                  );
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('عنا')));
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -201,10 +195,9 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
               ],
             ),
           ],
-          // شريط التبويبات الخمسة (السور، الجزء، الأحزاب، المرجعيات، التصنيفات)
           bottom: TabBar(
             controller: _tabController,
-            isScrollable: true, // لكي تتسع التبويبات الخمسة بسلاسة في الشاشة
+            isScrollable: true,
             indicatorColor: Colors.white,
             tabs: const [
               Tab(text: 'السور'),
@@ -218,7 +211,6 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
         body: TabBarView(
           controller: _tabController,
           children: [
-            // 1. تبويب السور
             ListView.builder(
               itemCount: surahs.length,
               padding: const EdgeInsets.all(12.0),
@@ -227,31 +219,17 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
                 return Card(
                   elevation: 2,
                   margin: const EdgeInsets.symmetric(vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: _isDarkMode ? Colors.grey[800] : Colors.green[100],
                       child: Text(
                         '${index + 1}',
-                        style: TextStyle(
-                          color: _isDarkMode ? Colors.greenAccent : Colors.green[800],
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(color: _isDarkMode ? Colors.greenAccent : Colors.green[800], fontWeight: FontWeight.bold),
                       ),
                     ),
-                    title: Text(
-                      surah['name']!,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    subtitle: Text(
-                      '${surah['type']} • ${surah['verses']}',
-                      style: TextStyle(color: _isDarkMode ? Colors.grey[400] : Colors.grey[600]),
-                    ),
+                    title: Text(surah['name']!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    subtitle: Text('${surah['type']} • ${surah['verses']}', style: TextStyle(color: _isDarkMode ? Colors.grey[400] : Colors.grey[600])),
                     trailing: Icon(Icons.arrow_forward_ios, size: 16, color: _isDarkMode ? Colors.greenAccent : Colors.green),
                     onTap: () {
                       Navigator.push(
@@ -265,17 +243,9 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
                 );
               },
             ),
-            
-            // 2. تبويب الأجزاء
             const Center(child: Text('قائمة الأجزاء', style: TextStyle(fontSize: 18))),
-
-            // 3. تبويب الأحزاب
             const Center(child: Text('قائمة الأحزاب', style: TextStyle(fontSize: 18))),
-            
-            // 4. تبويب المرجعيات
             const Center(child: Text('المرجعيات المحفوظة', style: TextStyle(fontSize: 18))),
-            
-            // 5. تبويب التصنيفات
             const Center(child: Text('التصنيفات الموضوعية', style: TextStyle(fontSize: 18))),
           ],
         ),
