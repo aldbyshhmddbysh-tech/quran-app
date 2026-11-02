@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'surah_detail_screen.dart';
 import 'quick_jump_screen.dart';
 import 'settings_screen.dart';
+import 'khatmah_screen.dart';
 
 class QuranScreen extends StatefulWidget {
   const QuranScreen({Key? key}) : super(key: key);
@@ -160,6 +161,8 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('فتح نافذة البحث')));
                 } else if (value == 'quick_jump') {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const QuickJumpScreen()));
+                } else if (value == 'khatmah') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const KhatmahScreen()));
                 } else if (value == 'settings') {
                   Navigator.push(
                     context,
@@ -189,6 +192,7 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(value: 'search', child: Text('بحث', textAlign: TextAlign.right)),
                 const PopupMenuItem<String>(value: 'quick_jump', child: Text('انتقال سريع', textAlign: TextAlign.right)),
+                const PopupMenuItem<String>(value: 'khatmah', child: Text('خطة الختمة', textAlign: TextAlign.right)),
                 const PopupMenuItem<String>(value: 'settings', child: Text('الإعدادات', textAlign: TextAlign.right)),
                 const PopupMenuItem<String>(value: 'help', child: Text('مساعدة', textAlign: TextAlign.right)),
                 const PopupMenuItem<String>(value: 'about', child: Text('عنا', textAlign: TextAlign.right)),
@@ -235,7 +239,10 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SurahDetailScreen(surahName: surah['name']!),
+                          builder: (context) => SurahDetailScreen(
+                            surahName: surah['name']!,
+                            selectedReciter: _selectedReciter,
+                          ),
                         ),
                       );
                     },
