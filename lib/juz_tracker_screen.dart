@@ -8,7 +8,7 @@ class JuzTrackerScreen extends StatefulWidget {
 
 class _JuzTrackerScreenState extends State<JuzTrackerScreen> {
   List<bool> _juzStatus = List.generate(30, (index) => false);
-  int _targetDays = 30; // عدد الأيام المستهدفة للختمة الافتراضية
+  int _targetDays = 30; // عدد الأيام المستهدف
 
   @override
   void initState() {
@@ -16,7 +16,6 @@ class _JuzTrackerScreenState extends State<JuzTrackerScreen> {
     _loadProgress();
   }
 
-  // تحميل الحالة المحفوظة من الذاكرة المحلية
   Future<void> _loadProgress() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -27,13 +26,11 @@ class _JuzTrackerScreenState extends State<JuzTrackerScreen> {
     });
   }
 
-  // حفظ حالة الجزء عند تغييره
   Future<void> _saveProgress(int index, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('juz_$index', value);
   }
 
-  // تصفير جميع الأجزاء وإعادة ضبط التقدم
   Future<void> _resetProgress() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -44,7 +41,6 @@ class _JuzTrackerScreenState extends State<JuzTrackerScreen> {
     }
   }
 
-  // حفظ و تغيير الأيام المستهدفة
   Future<void> _saveTargetDays(int days) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('target_days', days);
@@ -53,13 +49,54 @@ class _JuzTrackerScreenState extends State<JuzTrackerScreen> {
     });
   }
 
+  void _showTargetDaysDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        int tempDays = _targetDays;
+        return AlertDialog(
+          title: Text('حدد عدد أيام الختمة'),
+          content: Container(
+            width: double.minPositive,
+            child: DropdownButtonFormField<int>(
+              value: tempDays,
+              items: List.generate(60, (index) => index + 1)
+                  .map((days) => DropdownMenuItem(
+                        value: days,
+                        child: Text('$days يوم'),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                tempDays = value!;
+              },
+              decoration: InputDecoration(
+                labelText: 'الأيام المستهدفة',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('إلغاء'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _saveTargetDays(tempDays);
+                Navigator.pop(context);
+              },
+              child: Text('حفظ'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     int completedCount = _juzStatus.where((completed) => completed).length;
     int remainingJuz = 30 - completedCount;
-    
-    // حساب المعدل اليومي المتبقي (كم جزء في اليوم لإتمام الختمة في الوقت المحدد)
-    // كمثال افتراضي بناءً على الأجزاء المتبقية والأيام المفترضة
     double dailyRate = remainingJuz > 0 ? (_targetDays > 0 ? remainingJuz / _targetDays : 0) : 0;
 
     return Scaffold(
@@ -68,7 +105,11 @@ class _JuzTrackerScreenState extends State<JuzTrackerScreen> {
         centerTitle: true,
         backgroundColor: Colors.green[700],
         actions: [
-          // زر تصفير التقدم في الشريط العلوي
+          IconButton(
+            icon: Icon(Icons.calendar_today),
+            tooltip: 'تغيير عدد الأيام',
+            onPressed: _showTargetDaysDialog,
+          ),
           IconButton(
             icon: Icon(Icons.refresh),
             tooltip: 'إعادة ضبط الختمة',
@@ -77,7 +118,7 @@ class _JuzTrackerScreenState extends State<JuzTrackerScreen> {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: Text('إعادة ضبط الختمة'),
-                  content: Text('هل أنت متأكد من رغبتك في تصفير جميع الأجزاء المنجزة؟'),
+                  content: Text('هل أنت متأكد من تصفير جميع الأجزاء؟'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -99,7 +140,6 @@ class _JuzTrackerScreenState extends State<JuzTrackerScreen> {
       ),
       body: Column(
         children: [
-          // لوحة المعلومات والنسبة ومعدل القراءة اليومي
           Container(
             padding: const EdgeInsets.all(16.0),
             color: Colors.green[50],
@@ -127,7 +167,6 @@ class _JuzTrackerScreenState extends State<JuzTrackerScreen> {
                 ),
                 SizedBox(height: 8),
                 Divider(),
-                // قسم حساب معدل القراءة اليومية
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -142,6 +181,10 @@ class _JuzTrackerScreenState extends State<JuzTrackerScreen> {
                       ),
                     ),
                   ],
+                ),
+                Text(
+                  'خلال $_targetDays يوماً',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
