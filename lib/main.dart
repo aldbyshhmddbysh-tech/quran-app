@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'splash_screen.dart'; // 1. استيراد شاشة الترحيب لتكون البداية
 import 'quran_screen.dart';
 import 'quick_jump_screen.dart';
 import 'settings_screen.dart';
@@ -20,7 +21,7 @@ class QuranApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: const Color(0xFFE8DCC4), // لون خلفية تراثي متناسق
       ),
-      home: const HomeScreen(),
+      home: const SplashScreen(), // 2. جعل شاشة البداية بالآية هي أول ما يظهر عند فتح التطبيق
     );
   }
 }
@@ -172,7 +173,7 @@ class HomeScreen extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // الزخرفة على اليمين (يمكن استبدالها بصورة أو أيقونة زخرفية إذا توفرت)
+            // الزخرفة على اليمين
             Positioned(
               right: 8,
               child: Icon(Icons.star, size: 18, color: Colors.green[800]),
