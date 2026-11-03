@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'splash_screen.dart'; // 1. استيراد شاشة الترحيب لتكون البداية
+import 'splash_screen.dart'; // استيراد شاشة الترحيب
+import 'tasbih_screen.dart'; // 1. استيراد شاشة المسبحة الإلكترونية
 import 'quran_screen.dart';
 import 'quick_jump_screen.dart';
 import 'settings_screen.dart';
@@ -21,7 +22,7 @@ class QuranApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: const Color(0xFFE8DCC4), // لون خلفية تراثي متناسق
       ),
-      home: const SplashScreen(), // 2. جعل شاشة البداية بالآية هي أول ما يظهر عند فتح التطبيق
+      home: const SplashScreen(), // جعل شاشة البداية بالآية هي أول ما يظهر
     );
   }
 }
@@ -66,6 +67,18 @@ class HomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const QuranScreen()),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    // 2. زر المسبحة الإلكترونية الجديد
+                    _buildOrnateButton(
+                      context,
+                      title: 'المسبحة الإلكترونية',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const TasbihScreen()),
                         );
                       },
                     ),
