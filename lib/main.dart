@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'quran_screen.dart';
+import 'juz_tracker_screen.dart'; // 1. أضف استيراد شاشة تتبع الأجزاء هنا
 
 void main() {
   runApp(const QuranApp());
@@ -87,6 +88,28 @@ class HomeScreen extends StatelessWidget {
               icon: const Icon(Icons.favorite, color: Colors.white),
               label: const Text(
                 'الأذكار اليومية',
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // 2. زر تتبع الأجزاء الجديد الذي يفتح شاشة الـ JuzTrackerScreen
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[800],
+                minimumSize: const Size(double.infinity, 55),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => JuzTrackerScreen()),
+                );
+              },
+              icon: const Icon(Icons.list_alt, color: Colors.white),
+              label: const Text(
+                'تتبع أجزاء القرآن (خطة الختمة)',
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
