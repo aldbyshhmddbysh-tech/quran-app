@@ -3,6 +3,7 @@ import 'surah_detail_screen.dart';
 import 'quick_jump_screen.dart';
 import 'settings_screen.dart';
 import 'khatmah_screen.dart';
+import 'audio_recorder_screen.dart'; // استيراد شاشة تسجيل الصوت
 
 class QuranScreen extends StatefulWidget {
   const QuranScreen({Key? key}) : super(key: key);
@@ -155,6 +156,19 @@ class _QuranScreenState extends State<QuranScreen> with SingleTickerProviderStat
           centerTitle: true,
           backgroundColor: _isDarkMode ? Colors.grey[900] : Colors.green[700],
           actions: [
+            // زر الانتقال المباشر لشاشة تسجيل التلاوات
+            IconButton(
+              icon: const Icon(Icons.mic),
+              tooltip: 'تسجيل التلاوات',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AudioRecorderScreen(),
+                  ),
+                );
+              },
+            ),
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'search') {
