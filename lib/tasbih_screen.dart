@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TasbihScreen extends StatefulWidget {
   const TasbihScreen({Key? key}) : super(key: key);
@@ -20,16 +21,50 @@ class _TasbihScreenState extends State<TasbihScreen> {
     'صَلَّى اللَّهُ عَلَى مُحَمَّدٍ وَآلِ مُحَمَّدٍ',
   ];
 
-  void _incrementCounter() {
+  @override
+  void initState() {
+    super.initState();
+    _loadTasbihData();
+  }
+
+  // استرجاع البيانات المحفوظة محلياً عند فتح الشاشة
+  Future<void> _loadTasbihData() async {
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _counter++;
+      _counter = prefs.getInt('tasbih_counter') ?? 0;
+      _selectedAzkar = prefs.getString('selected_azkar') ?? 'سُبْحَانَ اللَّهِ';
     });
   }
 
-  void _resetCounter() {
+  // زيادة العداد وحفظه محلياً
+  Future<void> _incrementCounter() async {
+    setState(() {
+      _counter++;
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('tasbih_counter', _counter);
+  }
+
+  // تصفير العداد وحفظه محلياً
+  Future<void> _resetCounter() async {
     setState(() {
       _counter = 0;
     });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('tasbih_counter', 0);
+  }
+
+  // تغيير الذكر وحفظه محلياً
+  Future<void> _changeAzkar(String? newValue) async {
+    if (newValue != null) {
+      setState(() {
+        _selectedAzkar = newValue;
+        _counter = 0; // تصفير العداد عند تغيير الذكر
+      });
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('selected_azkar', newValue);
+      await prefs.setInt('tasbih_counter', 0);
+    }
   }
 
   @override
@@ -87,12 +122,7 @@ class _TasbihScreenState extends State<TasbihScreen> {
                         ),
                       );
                     }).toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        _selectedAzkar = newValue!;
-                        _counter = 0; // تصفير العداد عند تغيير الذكر
-                      });
-                    },
+                    onChanged: _changeAzkar,
                   ),
                 ),
               ),
