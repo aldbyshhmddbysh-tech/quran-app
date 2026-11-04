@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'splash_screen.dart'; // استيراد شاشة الترحيب
 import 'tasbih_screen.dart'; // استيراد شاشة المسبحة الإلكترونية
 import 'bookmarks_screen.dart'; // استيراد شاشة العلامات المحفوظة
-import 'search_screen.dart'; // 1. استيراد شاشة البحث في القرآن
+import 'search_screen.dart'; // استيراد شاشة البحث في القرآن
+import 'khatmah_screen.dart'; // 1. استيراد شاشة الختمة القرآنية
+import 'juz_tracker_screen.dart'; // 2. استيراد شاشة متتبع الأجزاء
+import 'tafsir_screen.dart'; // 3. استيراد شاشة التفسير
 import 'quran_screen.dart';
 import 'quick_jump_screen.dart';
 import 'settings_screen.dart';
@@ -84,7 +87,42 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 12),
-                    // 2. زر البحث في القرآن المحدث والانتقال لشاشته الفعليّة
+                    // زر الختمة القرآنية المربوط بشاشته الفعليّة
+                    _buildOrnateButton(
+                      context,
+                      title: 'الختمة القرآنية اليومية',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const KhatmahScreen()),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    // زر متتبع الأجزاء المربوط بشاشته الفعليّة
+                    _buildOrnateButton(
+                      context,
+                      title: 'متتبع الأجزاء',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const JuzTrackerScreen()),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    // زر التفسير المربوط بشاشته الفعليّة
+                    _buildOrnateButton(
+                      context,
+                      title: 'التفسير',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const TafsirScreen()),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
                     _buildOrnateButton(
                       context,
                       title: 'البحث في القرآن',
