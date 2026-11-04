@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'splash_screen.dart'; // استيراد شاشة الترحيب
 import 'tasbih_screen.dart'; // استيراد شاشة المسبحة الإلكترونية
-import 'bookmarks_screen.dart'; // 1. استيراد شاشة العلامات المحفوظة
+import 'bookmarks_screen.dart'; // استيراد شاشة العلامات المحفوظة
+import 'search_screen.dart'; // 1. استيراد شاشة البحث في القرآن
 import 'quran_screen.dart';
 import 'quick_jump_screen.dart';
 import 'settings_screen.dart';
@@ -83,12 +84,14 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 12),
+                    // 2. زر البحث في القرآن المحدث والانتقال لشاشته الفعليّة
                     _buildOrnateButton(
                       context,
                       title: 'البحث في القرآن',
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('فتح نافذة البحث')),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SearchScreen()),
                         );
                       },
                     ),
@@ -104,7 +107,6 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 12),
-                    // 2. زر العلامات المحفوظة المحدث
                     _buildOrnateButton(
                       context,
                       title: 'العلامات المحفوظة',
