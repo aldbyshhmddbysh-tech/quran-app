@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'quran_data.dart';
 import 'tafsir_screen.dart';
 
@@ -12,6 +13,28 @@ class SurahDetailScreen extends StatelessWidget {
     required this.surahName,
     required this.selectedReciter,
   }) : super(key: key);
+
+  // دالة حفظ الآية في الذاكرة المحلية (العلامات المحفوظة)
+  Future<void> _addBookmark(BuildContext context, String ayahText) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> rawBookmarks = prefs.getStringList('quran_bookmarks_map') ?? [];
+    
+    // تنسيق العنوان مع اسم السورة
+    String bookmarkEntry = '$surahName - $ayahText|||تتمة القراءة';
+    
+    if (!rawBookmarks.contains(bookmarkEntry)) {
+      rawBookmarks.add(bookmarkEntry);
+      await prefs.setStringList('quran_bookmarks_map', rawBookmarks);
+    }
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('تمت إضافة الآية للمرجعيات المحفوظة بنجاح'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
 
   void _showAyahOptions(BuildContext context, String ayahText, List<dynamic> ayat) {
     showModalBottomSheet(
@@ -34,13 +57,11 @@ class SurahDetailScreen extends StatelessWidget {
               ),
               const Divider(height: 20),
               ListTile(
-                leading: const Icon(Icons.bookmark_add, color: Colors.teal),
+                leading: const Icon(Icons.bookmark_add, color: Color(0xFF5A6B48)),
                 title: const Text('وضع علامة مرجعية'),
                 onTap: () {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تمت إضافة الآية للمرجعيات')),
-                  );
+                  _addBookmark(context, ayahText);
                 },
               ),
               ListTile(
@@ -48,11 +69,10 @@ class SurahDetailScreen extends StatelessWidget {
                 title: const Text('إضافة ملاحظة أو تدبر'),
                 onTap: () {
                   Navigator.pop(context);
-                  // استدعاء نافذة الملاحظة
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.book, color: Colors.green),
+                leading: const Icon(Icons.book, color: Color(0xFF5A6B48)),
                 title: const Text('تفسير الآية'),
                 onTap: () {
                   Navigator.pop(context);
@@ -107,16 +127,18 @@ class SurahDetailScreen extends StatelessWidget {
     final String surahType = surah['type'] ?? 'مكية';
 
     return Scaffold(
+      backgroundColor: const Color(0xFFE8DCC4), // لون التراث المتناسق
       appBar: AppBar(
         title: Text(surahName),
         centerTitle: true,
-        backgroundColor: Colors.green[700],
+        backgroundColor: const Color(0xFF5A6B48),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            color: Colors.grey[200],
+            color: const Color(0xFFF3EED9),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -133,7 +155,11 @@ class SurahDetailScreen extends StatelessWidget {
                   return Container(
                     margin: const EdgeInsets.all(12.0),
                     padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 16.0),
-                    decoration: BoxDecoration(color: Colors.black, border: Border.all(color: Colors.white75, width: 1.5), borderRadius: BorderRadius.circular(8.0)),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5A6B48),
+                      border: Border.all(color: Colors.white75, width: 1.5),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -150,8 +176,8 @@ class SurahDetailScreen extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                      decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(20)),
-                      child: const Text('٢٢٥', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      decoration: BoxDecoration(border: Border.all(color: const Color(0xFF5A6B48)), borderRadius: BorderRadius.circular(20)),
+                      child: const Text('صدق الله العلي العظيم', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF5A6B48))),
                     ),
                   );
                 }
@@ -160,16 +186,21 @@ class SurahDetailScreen extends StatelessWidget {
                 return GestureDetector(
                   onLongPress: () => _showAyahOptions(context, ayahText, ayat),
                   child: Card(
+                    color: const Color(0xFFF3EED9),
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: const BorderSide(color: Color(0xFF5A6B48), width: 1.0),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(backgroundColor: Colors.green[100], radius: 14, child: Text('${ayahIndex + 1}', style: TextStyle(fontSize: 12, color: Colors.green[800], fontWeight: FontWeight.bold))),
+                          CircleAvatar(backgroundColor: const Color(0xFF5A6B48), radius: 14, child: Text('${ayahIndex + 1}', style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold))),
                           const SizedBox(width: 12),
-                          Expanded(child: Text(ayahText, style: const TextStyle(fontSize: 18, height: 1.6), textAlign: TextAlign.right)),
+                          Expanded(child: Text(ayahText, style: const TextStyle(fontSize: 18, height: 1.6, color: Color(0xFF2C2C2C)), textAlign: TextAlign.right)),
                         ],
                       ),
                     ),
