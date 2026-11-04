@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'splash_screen.dart'; // استيراد شاشة الترحيب
-import 'tasbih_screen.dart'; // 1. استيراد شاشة المسبحة الإلكترونية
+import 'tasbih_screen.dart'; // استيراد شاشة المسبحة الإلكترونية
+import 'bookmarks_screen.dart'; // 1. استيراد شاشة العلامات المحفوظة
 import 'quran_screen.dart';
 import 'quick_jump_screen.dart';
 import 'settings_screen.dart';
@@ -71,7 +72,6 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 12),
-                    // 2. زر المسبحة الإلكترونية الجديد
                     _buildOrnateButton(
                       context,
                       title: 'المسبحة الإلكترونية',
@@ -104,12 +104,14 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 12),
+                    // 2. زر العلامات المحفوظة المحدث
                     _buildOrnateButton(
                       context,
                       title: 'العلامات المحفوظة',
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('العلامات المحفوظة')),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const BookmarksScreen()),
                         );
                       },
                     ),
