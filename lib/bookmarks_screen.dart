@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BookmarksScreen extends StatefulWidget {
   const BookmarksScreen({Key? key}) : super(key: key);
@@ -8,17 +9,55 @@ class BookmarksScreen extends StatefulWidget {
 }
 
 class _BookmarksScreenState extends State<BookmarksScreen> {
-  // قائمة تجريبية للعلامات المحفوظة (يمكن ربطها بقاعدة بيانات أو SharedPreferences لاحقاً)
-  final List> _bookmarks = [
-    {'title': 'سورة البقرة - الآية 255 (آية الكرسي)', 'page': 'الصفحة 42'},
-    {'title': 'سورة الكهف - الآية 10', 'page': 'الصفحة 293'},
-    {'title': 'سورة يس - الآية 58', 'page': 'الصفحة 443'},
-  ];
+  List> _bookmarks = [];
 
-  void _removeBookmark(int index) {
+  @override
+  void initState() {
+    super.initState();
+    _loadBookmarks();
+  }
+
+  // استرجاع العلامات المحفوظة من الذاكرة المحلية
+  Future<void> _loadBookmarks() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> rawBookmarks = prefs.getStringList('quran_bookmarks_map') ?? [];
+    
+    setState(() {
+      _bookmarks = rawBookmarks.map((item) {
+        final parts = item.split('|||');
+        return {
+          'title': parts.isNotEmpty ? parts[0] : '',
+          'page': parts.length > 1 ? parts[1] : '',
+        };
+      }).toList();
+
+      // إذا لم تكن هناك علامات مخزنة مسبقاً، نضع العلامات التجريبية الافتراضية ونحفظها
+      if (_bookmarks.isEmpty) {
+        _bookmarks = [
+          {'title': 'سورة البقرة - الآية 255 (آية الكرسي)', 'page': 'الصفحة 42'},
+          {'title': 'سورة الكهف - الآية 10', 'page': 'الصفحة 293'},
+          {'title': 'سورة يس - الآية 58', 'page': 'الصفحة 443'},
+        ];
+        _saveBookmarks();
+      }
+    });
+  }
+
+  // حفظ العلامات في الذاكرة المحلية
+  Future<void> _saveBookmarks() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> rawBookmarks = _bookmarks.map((b) => '${b['title']}|||${b['page']}').toList();
+    await prefs.setStringList('quran_bookmarks_map', rawBookmarks);
+  }
+
+  // حذف علامة وتحديث التخزين المحلي
+  Future<void> _removeBookmark(int index) async {
     setState(() {
       _bookmarks.removeAt(index);
     });
+    await _saveBookmarks();
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('تم حذف العلامة بنجاح'),
